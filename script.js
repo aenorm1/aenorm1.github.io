@@ -64,4 +64,42 @@ function handleSubmit(event) {
     });
     
     return false;
+}
+
+// --- Automatic Resume Download ---
+document.addEventListener('DOMContentLoaded', () => {
+    const downloadLink = document.getElementById('download-link');
+    
+    if (downloadLink) {
+        downloadLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const fileUrl = this.getAttribute('href');
+            const fileName = "Alex Norman's Resume.pdf";
+
+            fetch(fileUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const tempLink = document.createElement('a');
+                    
+                    tempLink.href = blobUrl;
+                    tempLink.download = fileName;
+                    
+                    document.body.appendChild(tempLink);
+                    tempLink.click();
+                    document.body.removeChild(tempLink);
+                    
+                    window.URL.revokeObjectURL(blobUrl);
+                })
+                .catch(error => {
+                    console.error('Download failed, falling back to standard link:', error);
+                    window.location.href = fileUrl;
+                });
+        });
+    }
+});
 } 
